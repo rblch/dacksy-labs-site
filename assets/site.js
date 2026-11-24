@@ -510,7 +510,15 @@ document.querySelector('#project-close').addEventListener('click', event => {
 
 projects.forEach(project => {
   const card = cardOf(project);
-  card.addEventListener('click', () => showProject(project, card));
+  card.addEventListener('click', () => {
+    // In the phone stack, tapping a card peeking out from under the top one brings it up.
+    const slot = project.dataset.slot;
+    if (compact.matches && slot !== 'center') {
+      shiftStack(slot === 'right' ? 'next' : 'previous');
+      return;
+    }
+    showProject(project, card);
+  });
 });
 
 /* Entrance */

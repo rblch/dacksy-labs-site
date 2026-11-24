@@ -523,13 +523,14 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 
   .home { --card-width: clamp(12rem, 69vw, 17rem); }
 
-  /* Only the top card takes touches: the edges peeking out from under it would
-     otherwise swap the hidden cards or open one the visitor can't see. */
   .project[data-slot="left"], .project[data-slot="right"] {
     --slot-y: 0.6rem;
     --slot-scale: 0.9;
-    pointer-events: none;
   }
+
+  /* The pile: the next card (right) lies directly under the top one, the previous
+     card (left) at the bottom. */
+  .project[data-slot="left"] { z-index: 0; }
 
   .project[data-slot="left"] { --slot-turn: -5deg; }
   .project[data-slot="right"] { --slot-turn: 5deg; }
