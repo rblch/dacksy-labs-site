@@ -504,6 +504,9 @@ projectDialog.addEventListener('cancel', event => {
 projectDialog.addEventListener('click', event => {
   if (event.target === projectDialog) closeProject('pointer');
 });
+document.querySelector('#project-close').addEventListener('click', event => {
+  closeProject(event.detail === 0 ? 'keyboard' : 'pointer');
+});
 
 projects.forEach(project => {
   const card = cardOf(project);

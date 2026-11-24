@@ -408,6 +408,7 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 .project-flip-front .project-card { transform-origin: top left; }
 
 .project-flip-back {
+  position: relative;
   display: flex;
   min-height: min(25rem, calc(var(--viewport) - 2rem));
   max-height: calc(var(--viewport) - 2rem);
@@ -422,6 +423,39 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
   transform: rotateY(180deg);
   backface-visibility: hidden;
 }
+
+/* Close button: a drawn x in the card's top corner, over the colour panel. */
+.project-close {
+  position: absolute;
+  z-index: 1;
+  top: 0.35rem;
+  right: 0.35rem;
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.project-close::before,
+.project-close::after {
+  grid-area: 1 / 1;
+  width: 1.1rem;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+  content: "";
+  rotate: 45deg;
+}
+
+.project-close::after { rotate: -45deg; }
+
+.project-close:hover { background: rgb(35 34 36 / 8%); }
 
 .project-back-art {
   display: grid;
