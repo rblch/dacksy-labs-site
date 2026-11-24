@@ -10,6 +10,9 @@
   --gutter: clamp(1.25rem, 6vw, 5rem);
   --header-height: 4.75rem;
   --footer-height: 3.5rem;
+  /* The visible height without the browser's toolbars. Safari sometimes reports 100svh
+     as the whole screen, toolbar included, after a navigation; 100dvh stays right. */
+  --viewport: min(100svh, 100dvh);
   font-family: system-ui, sans-serif;
   background: var(--page);
   color: var(--text);
@@ -19,7 +22,7 @@
 body {
   display: flex;
   min-width: 16rem;
-  min-height: 100svh;
+  min-height: var(--viewport);
   margin: 0;
   flex-direction: column;
 }
@@ -248,7 +251,7 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 
 /* Deck */
 .home {
-  --card-width: clamp(13.25rem, min(26vw, 40svh), 18rem);
+  --card-width: clamp(13.25rem, min(26vw, calc(var(--viewport) * 0.4)), 18rem);
   --card-ratio: calc(88 / 107);
   position: relative;
   display: flex;
@@ -260,7 +263,7 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
   --spread: min(calc(var(--card-width) + 1.25rem), max(0px, calc(50vw - var(--card-width) / 2 - 1rem)));
   position: relative;
   width: 100%;
-  height: max(calc(100svh - var(--header-height) - var(--footer-height)), calc(var(--card-width) / var(--card-ratio) + 9rem));
+  height: max(calc(var(--viewport) - var(--header-height) - var(--footer-height)), calc(var(--card-width) / var(--card-ratio) + 9rem));
   margin: 0;
   padding: 0;
   overflow: clip;
@@ -406,8 +409,8 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 
 .project-flip-back {
   display: flex;
-  min-height: min(25rem, calc(100svh - 2rem));
-  max-height: calc(100svh - 2rem);
+  min-height: min(25rem, calc(var(--viewport) - 2rem));
+  max-height: calc(var(--viewport) - 2rem);
   flex-direction: column;
   gap: 1rem;
   padding: clamp(1rem, 4vw, 1.4rem);
