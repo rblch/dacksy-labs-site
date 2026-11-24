@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf9f6">
+  <meta name="description" content="Explore the apps made by Dacksy Labs.">
+  <title>Dacksy Labs · Pastel preview</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #faf9f6;
+      --text: #2f2438;
+      --muted: #67584f;
+      --accent: #ab3829;
+      --line: #bfb1a0;
+      --paper-grain: url("assets/riso-paper.webp");
+      --gutter: clamp(1.25rem, 6vw, 5rem);
+      --header-height: 4.75rem;
+      font-family: system-ui, sans-serif;
+      background: var(--page);
+      color: var(--text);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; min-width: 16rem; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { color: inherit; font: inherit; }
+
+    button:focus-visible, a:focus-visible, .deck:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    [hidden] { display: none !important; }
+
+    .shell {
+      width: min(69rem, calc(100% - var(--gutter) * 2));
+      margin-inline: auto;
+    }
+
+    .header {
+      display: flex;
+      min-height: var(--header-height);
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      color: var(--text);
+      font-size: 1.2rem;
+      font-weight: 560;
+      letter-spacing: -0.045em;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      min-height: 2.75rem;
+      align-items: center;
+      justify-content: center;
+      padding: 0.45rem 1.05rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text);
+      font-size: 0.875rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 150ms ease, border-color 150ms ease;
+    }
+
+    .pill:hover { background: #e9deca; border-color: var(--muted); }
+
+    main {
+      display: flex;
+      min-height: calc(100svh - var(--header-height));
+      flex-direction: column;
+    }
+
+    .projects {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .deck {
+      --card-width: clamp(13.25rem, min(26vw, 40svh), 18rem);
+      --card-ratio: calc(4 / 5);
+      --spread: min(clamp(10.5rem, 19vw, 14.2rem), max(0px, calc(50vw - var(--card-width) * 0.53 - 1rem)));
+      position: relative;
+      width: 100%;
+      height: max(calc(100svh - var(--header-height)), calc(var(--card-width) / var(--card-ratio) + 9rem));
+      margin: 0 auto;
+      padding: 0;
+      overflow: clip;
+      isolation: isolate;
+      list-style: none;
+      touch-action: pan-y;
+    }
+
+    .deck:focus-visible { outline-offset: -4px; }
+
+    .project {
+      --slot-x: 0px;
+      --slot-y: 0px;
+      --slot-turn: 0deg;
+      --slot-scale: 1;
+      position: absolute;
+      z-index: 2;
+      top: calc(50% - 1.25rem);
+      left: 50%;
+      width: var(--card-width);
+      aspect-ratio: var(--card-ratio);
+      transform: translate(-50%, -50%)
+        translate(var(--slot-x), var(--slot-y))
+        rotate(var(--slot-turn))
+        scale(var(--slot-scale));
+      transition: filter 260ms ease;
+    }
+
+    .project[data-slot="left"], .project[data-slot="right"] {
+      --slot-y: 0.7rem;
+      --slot-scale: 0.88;
+      z-index: 1;
+      filter: brightness(0.98) saturate(0.96);
+    }
+
+    .project[data-slot="left"] {
+      --slot-x: calc(-1 * var(--spread));
+      --slot-turn: -9deg;
+    }
+
+    .project[data-slot="right"] {
+      --slot-x: var(--spread);
+      --slot-turn: 9deg;
+    }
+
+    .project--dackel {
+      --card: #fae8b0;
+      --ink: #684133;
+      --pattern: rgb(123 72 48 / 31%);
+    }
+
+    .project--violet {
+      --card: #dedaf6;
+      --ink: #474073;
+      --pattern: rgb(71 64 115 / 32%);
+    }
+
+    .project--coral {
+      --card: #f4cccb;
+      --ink: #285447;
+      --pattern: rgb(40 84 71 / 32%);
+    }
+
+    .project-card {
+      position: relative;
+      isolation: isolate;
+      display: flex;
+      width: 100%;
+      height: 100%;
+      align-items: end;
+      padding: 1.375rem;
+      overflow: hidden;
+      border: 1px solid var(--pattern);
+      border-radius: 0.95rem;
+      background: var(--card) var(--paper-grain) repeat;
+      box-shadow: 0 12px 26px rgb(63 43 39 / 18%), 1px 2px 0 rgb(97 64 48 / 23%);
+      color: var(--ink);
+      text-align: left;
+      text-decoration: none;
+      cursor: grab;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .project-card::before {
+      position: absolute;
+      inset: 0.45rem;
+      border: 1px solid var(--pattern);
+      border-radius: 0.6rem;
+      pointer-events: none;
+      content: "";
+    }
+
+    .project-card:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: -5px;
+    }
+
+    .project-orbits {
+      position: absolute;
+      z-index: -2;
+      top: 41%;
+      left: 50%;
+      width: 88%;
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--pattern) 0.65px, transparent 0.9px) 0 0 / 5px 5px;
+      mask-image: radial-gradient(farthest-side, #000 45%, transparent 98%);
+      pointer-events: none;
+    }
+
+    .project-art {
+      position: absolute;
+      z-index: -1;
+      top: 41%;
+      left: 50%;
+      width: 83%;
+      height: 56%;
+      object-fit: contain;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    .placeholder-print {
+      position: absolute;
+      top: 41%;
+      left: 50%;
+      width: 56%;
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, var(--ink) 0.78px, transparent 1px) 0 0 / 4px 4px;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .project--violet .placeholder-print {
+      mask-image: radial-gradient(closest-side, transparent 54%, #000 55% 96%, transparent 97%);
+    }
+
+    .project--coral .placeholder-print {
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    }
+
+    .project-caption {
+      display: flex;
+      width: 100%;
+      align-items: end;
+      justify-content: space-between;
+      gap: 0.4rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--pattern);
+    }
+
+    .project-name {
+      display: block;
+      font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+      font-weight: 590;
+      line-height: 1.05;
+      letter-spacing: -0.055em;
+    }
+
+    .project-type {
+      display: block;
+      margin-top: 0.3rem;
+      font-size: 0.875rem;
+      line-height: 1.3;
+    }
+
+    .project-open {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.15rem;
+      padding-inline: 0.6rem;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      font-size: 0.875rem;
+      line-height: 1;
+      transition: opacity 180ms ease, visibility 180ms ease;
+    }
+
+    .project-card:hover .project-open { background: var(--pattern); }
+    .project:not([data-slot="center"]) .project-open { opacity: 0; visibility: hidden; }
+    .project--violet .project-caption, .project--coral .project-caption {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .project.is-dragging { z-index: 3; filter: none; transition: none; }
+    .project.is-dragging .project-card { cursor: grabbing; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    .sheet {
+      width: min(28rem, calc(100% - 2.5rem));
+      max-height: calc(100% - 2.5rem);
+      padding: 1.5rem;
+      border: 1px solid var(--line);
+      border-radius: 0.95rem;
+      background: var(--page) var(--paper-grain);
+      color: var(--text);
+    }
+
+    .sheet::backdrop {
+      background: rgb(56 37 45 / 47%);
+      backdrop-filter: blur(6px);
+    }
+
+    .sheet-close { display: flex; justify-content: end; }
+
+    .sheet h2 {
+      margin: 0.35rem 0 0;
+      color: var(--accent);
+      font-size: clamp(1.8rem, 7vw, 2.6rem);
+      font-weight: 500;
+      line-height: 1.08;
+      letter-spacing: -0.055em;
+    }
+
+    .sheet p {
+      margin: 0.65rem 0 0.15rem;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 38rem) {
+      :root { --header-height: 4.25rem; }
+      .deck {
+        --card-width: clamp(12rem, 69vw, 17rem);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header shell">
+    <a class="brand" href="./pastel.html" aria-label="Dacksy Labs home">Dacksy Labs</a>
+    <a class="pill" id="about-link" href="#about">About</a>
+  </header>
+
+  <main id="home">
+    <h1 class="sr-only">Dacksy Labs</h1>
+    <section class="projects" aria-labelledby="projects-title">
+      <h2 class="sr-only" id="projects-title">Projects</h2>
+      <ul class="deck" id="deck" tabindex="0" aria-label="Project cards" aria-keyshortcuts="ArrowLeft ArrowRight">
+        <li class="project project--dackel" data-slot="center">
+          <a class="project-card" href="https://dackelapp.com/" draggable="false">
+            <span class="project-orbits" aria-hidden="true"></span>
+            <img class="project-art" src="assets/dackel-mascot.png" alt="" width="424" height="239" draggable="false">
+            <span class="project-caption">
+              <span><span class="project-name">Dackel</span><span class="project-type">Markdown editor for Mac</span></span>
+              <span class="project-open">Visit</span>
+            </span>
+          </a>
+        </li>
+
+        <li class="project project--violet" data-slot="right" data-label="Violet coming-soon card">
+          <button class="project-card" type="button">
+            <span class="placeholder-print" aria-hidden="true"></span>
+            <span class="project-caption">
+              <span class="project-name">Coming soon</span>
+            </span>
+          </button>
+        </li>
+
+        <li class="project project--coral" data-slot="left" data-label="Coral coming-soon card">
+          <button class="project-card" type="button">
+            <span class="placeholder-print" aria-hidden="true"></span>
+            <span class="project-caption">
+              <span class="project-name">Coming soon</span>
+            </span>
+          </button>
+        </li>
+      </ul>
+
+      <p class="sr-only" id="deck-status" aria-live="polite"></p>
+    </section>
+
+    <section class="shell" id="about" hidden>
+      <h2>About Dacksy Labs</h2>
+      <p>We’re an indie app developer with a soft spot for playful ideas and simple design.</p>
+    </section>
+    <noscript>
+      <style>
+        #about[hidden] { display: block !important; padding-bottom: 2rem; }
+        .project-card { cursor: default; }
+      </style>
+    </noscript>
+  </main>
+
+  <dialog class="sheet" id="details" aria-labelledby="details-title">
+    <div class="sheet-close">
+      <form method="dialog">
+        <button class="pill" type="submit" autofocus>Close</button>
+      </form>
+    </div>
+    <h2 id="details-title"></h2>
+    <p id="details-copy"></p>
+  </dialog>
+
+  <script>
+    const deck = document.querySelector('#deck');
+    const projects = [...deck.querySelectorAll('.project')];
+    const slots = ['left', 'center', 'right'];
+    const names = projects.map(project => project.dataset.label ?? project.querySelector('.project-name').textContent);
+    const status = document.querySelector('#deck-status');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const cardMotions = new Map();
+    const dragInset = 12;
+    let drag = null;
+    let swallowClick = false;
+
+    function projectIn(slot) {
+      return projects.find(project => project.dataset.slot === slot);
+    }
+
+    function updateDeck(announce = false) {
+      projects.forEach((project, index) => {
+        const centered = project.dataset.slot === 'center';
+        const card = project.querySelector('.project-card');
+        if (centered && card.matches('a')) {
+          card.removeAttribute('aria-label');
+        } else {
+          card.setAttribute('aria-label', centered ? names[index] : `Center ${names[index]}`);
+        }
+        if (card.matches('button')) card.setAttribute('aria-disabled', String(centered));
+      });
+
+      if (announce) status.textContent = `${names[projects.indexOf(projectIn('center'))]} is centered.`;
+    }
+
+    function pauseCard(project) {
+      const { transform, translate } = getComputedStyle(project);
+      // Capture the lift separately so a second gesture starts from the visible position.
+      const [, lift = '0px'] = translate.split(' ');
+      cardMotions.get(project)?.animation.cancel();
+      cardMotions.delete(project);
+      return `translateY(${lift}) ${transform}`;
+    }
+
+    function settleCard(project, from, lift = 0) {
+      const restingTransform = getComputedStyle(project).transform;
+      const to = `translateY(0px) ${restingTransform}`;
+      if (reducedMotion.matches || from === to) return;
+
+      const animation = project.animate({
+        transform: [from, to],
+        translate: ['0px 0px', `0px ${lift}px`, '0px 0px']
+      }, {
+        duration: 360,
+        easing: 'cubic-bezier(0.22, 0.72, 0.28, 1)'
+      });
+
+      cardMotions.set(project, { animation, restingTransform });
+      animation.onfinish = () => {
+        if (cardMotions.get(project)?.animation === animation) cardMotions.delete(project);
+      };
+    }
+
+    function swapLift(from, to) {
+      if (to === 'center') return -26;
+      return from === 'center' ? 12 : 0;
+    }
+
+    function elasticOffset(distance, position, halfSize, areaSize) {
+      const room = distance < 0 ? position - halfSize : areaSize - position - halfSize;
+      const limit = Math.max(0, room - dragInset);
+      const spring = Math.min(56, limit / 2);
+      const freeTravel = limit - spring;
+      const compression = Math.abs(distance) - freeTravel;
+      if (compression <= 0) return distance;
+      // The remaining travel approaches the edge without reaching it.
+      return Math.sign(distance) * (freeTravel + spring * compression / (spring + compression));
+    }
+
+    function moveToSlot(project, slot) {
+      if (drag?.active) return;
+      const origin = project.dataset.slot;
+      const occupant = origin === slot ? null : projectIn(slot);
+      if (!occupant && !project.classList.contains('is-dragging')) return;
+
+      const from = pauseCard(project);
+      project.classList.remove('is-dragging');
+      project.style.removeProperty('transform');
+
+      if (!occupant) {
+        settleCard(project, from);
+        return;
+      }
+
+      const occupantFrom = pauseCard(occupant);
+      const centerChanges = origin === 'center' || slot === 'center';
+      occupant.dataset.slot = origin;
+      project.dataset.slot = slot;
+      settleCard(project, from, swapLift(origin, slot));
+      settleCard(occupant, occupantFrom, swapLift(slot, origin));
+      updateDeck(centerChanges);
+    }
+
+    deck.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      const side = event.key === 'ArrowLeft' ? 'left' : 'right';
+      const project = projectIn(side);
+      moveToSlot(project, 'center');
+      project.querySelector('.project-card').focus({ preventScroll: true });
+    });
+
+    deck.addEventListener('pointerdown', event => {
+      if (!event.isPrimary || event.button !== 0 || drag) return;
+      swallowClick = false;
+      const project = event.target.closest('.project');
+      if (!project) return;
+
+      const right = projectIn('right');
+      const rightTransform = cardMotions.get(right)?.restingTransform ?? getComputedStyle(right).transform;
+      const spread = new DOMMatrix(rightTransform).e + right.offsetWidth / 2;
+      drag = {
+        project,
+        id: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        spread,
+        active: false
+      };
+    });
+
+    window.addEventListener('pointermove', event => {
+      if (event.pointerId !== drag?.id) return;
+      const x = event.clientX - drag.startX;
+      const y = event.clientY - drag.startY;
+
+      if (!drag.active) {
+        if (Math.max(Math.abs(x), Math.abs(y)) < 6) return;
+        if (event.pointerType !== 'mouse' && Math.abs(y) > Math.abs(x)) return;
+        const area = deck.getBoundingClientRect();
+        const bounds = drag.project.getBoundingClientRect();
+        drag.area = area;
+        drag.centerX = bounds.left + bounds.width / 2 - area.left;
+        drag.centerY = bounds.top + bounds.height / 2 - area.top;
+        drag.halfWidth = bounds.width / 2;
+        drag.width = drag.project.offsetWidth;
+        drag.height = drag.project.offsetHeight;
+        drag.matrix = new DOMMatrix(getComputedStyle(drag.project).transform);
+        drag.active = true;
+        drag.from = pauseCard(drag.project);
+        drag.project.classList.add('is-dragging');
+        deck.setPointerCapture(event.pointerId);
+      }
+
+      const { area, centerX, centerY, width, height, matrix } = drag;
+      const travel = elasticOffset(x, centerX, drag.halfWidth, area.width);
+      const tilt = reducedMotion.matches ? 0 : Math.max(-16, Math.min(16, travel / 13));
+      const rotated = matrix.rotate(tilt);
+      const halfWidth = (Math.abs(rotated.a) * width + Math.abs(rotated.c) * height) / 2;
+      const halfHeight = (Math.abs(rotated.b) * width + Math.abs(rotated.d) * height) / 2;
+      const offsetX = elasticOffset(x, centerX, halfWidth, area.width);
+      const offsetY = elasticOffset(y * 0.6, centerY, halfHeight, area.height);
+      drag.project.style.transform = `translate(${offsetX}px, ${offsetY}px) ${drag.from} rotate(${tilt}deg)`;
+    });
+
+    function finishDrag(event) {
+      if (event.pointerId !== drag?.id) return;
+      const { project, startX, spread, active } = drag;
+      drag = null;
+      if (!active) return;
+
+      swallowClick = true;
+      const distance = event.clientX - startX;
+      let target = project.dataset.slot;
+      if (event.type === 'pointerup' && Math.abs(distance) >= Math.max(24, spread * 0.3)) {
+        const start = slots.indexOf(target);
+        const steps = Math.max(1, Math.round(Math.abs(distance) / spread));
+        const end = Math.max(0, Math.min(slots.length - 1, start + Math.sign(distance) * steps));
+        target = slots[end];
+      }
+
+      moveToSlot(project, target);
+    }
+
+    window.addEventListener('pointerup', finishDrag);
+    window.addEventListener('pointercancel', finishDrag);
+    deck.addEventListener('lostpointercapture', event => {
+      if (event.target === deck) finishDrag(event);
+    });
+    window.addEventListener('blur', () => {
+      if (drag) finishDrag({ pointerId: drag.id });
+    });
+    window.addEventListener('resize', () => {
+      if (drag) finishDrag({ pointerId: drag.id });
+    });
+
+    deck.addEventListener('click', event => {
+      if (!swallowClick || event.detail === 0) return;
+      swallowClick = false;
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
+
+    const details = document.querySelector('#details');
+    const detailsTitle = document.querySelector('#details-title');
+    const detailsCopy = document.querySelector('#details-copy');
+    const about = document.querySelector('#about');
+
+    projects.forEach(project => {
+      const card = project.querySelector('.project-card');
+      card.addEventListener('click', event => {
+        if (project.dataset.slot === 'center') return;
+        if (card.matches('a') && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
+        event.preventDefault();
+        moveToSlot(project, 'center');
+      });
+    });
+
+    document.querySelector('#about-link').addEventListener('click', event => {
+      event.preventDefault();
+      detailsTitle.textContent = about.querySelector('h2').textContent;
+      detailsCopy.textContent = about.querySelector('p').textContent;
+      details.showModal();
+    });
+
+    updateDeck();
+  </script>
+</body>
+</html>
