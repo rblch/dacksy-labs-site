@@ -13,12 +13,45 @@ let hasReordered = false;
 const cardOf = project => project.querySelector('.project-card');
 const projectIn = slot => projects.find(project => project.dataset.slot === slot);
 
-/* Layout: Dackel leads on the left of the row, or on top of the stack on small screens. */
+/* Position dots for the phone stack */
+
+const dots = document.createElement('div');
+dots.className = 'deck-dots';
+const dotOf = new Map(projects.map(project => {
+  const dot = document.createElement('button');
+  dot.type = 'button';
+  dot.className = 'deck-dot';
+  dot.setAttribute('aria-label', cardOf(project).getAttribute('aria-label'));
+  dot.addEventListener('click', () => {
+    const slot = project.dataset.slot;
+    if (slot !== 'center') shiftStack(slot === 'right' ? 'next' : 'previous');
+  });
+  dots.append(dot);
+  return [project, dot];
+}));
+deck.after(dots);
+
+function updateDots() {
+  dotOf.forEach((dot, project) => {
+    dot.setAttribute('aria-current', project.dataset.slot === 'center');
+  });
+}
+
+function announceCenter() {
+  updateDots();
+  const name = cardOf(projectIn('center')).getAttribute('aria-label');
+  status.textContent = status.dataset.template.replace('{name}', name);
+}
+
+/* Layout: Dackel leads on the left of the row, or on top of the stack on small screens.
+   In the stack, the card peeking out on the right is next and the one on the left is previous. */
 
 function placeFeaturedCard() {
-  const [dackel, coral] = projects;
+  const [dackel, coral, lilac] = projects;
   dackel.dataset.slot = compact.matches ? 'center' : 'left';
-  coral.dataset.slot = compact.matches ? 'left' : 'center';
+  coral.dataset.slot = compact.matches ? 'right' : 'center';
+  lilac.dataset.slot = compact.matches ? 'left' : 'right';
+  updateDots();
 }
 
 placeFeaturedCard();
@@ -82,18 +115,85 @@ function moveToSlot(project, slot) {
   project.dataset.slot = slot;
   settleCard(project, from, swapLift(origin, slot));
   settleCard(occupant, occupantFrom, swapLift(slot, origin));
-  if (origin === 'center' || slot === 'center') {
-    const name = cardOf(projectIn('center')).getAttribute('aria-label');
-    status.textContent = status.dataset.template.replace('{name}', name);
+  if (origin === 'center' || slot === 'center') announceCenter();
+}
+
+/* The phone stack: cards cycle through it, next from the right, previous from the left. */
+
+const stackVars = ['--slot-x', '--slot-y', '--slot-turn', '--slot-scale'];
+const clearStackVars = project => stackVars.forEach(name => project.style.removeProperty(name));
+
+// Animates a card from where it is drawn now to its resting place.
+function glide(project, from, { duration = 380, easing = 'cubic-bezier(0.22, 0.72, 0.28, 1)' } = {}) {
+  const to = getComputedStyle(project).transform;
+  if (reducedMotion.matches || from === to) return;
+  const animation = project.animate({ transform: [from, to] }, { duration, easing });
+  cardMotions.set(project, { animation, restingTransform: to });
+  animation.onfinish = () => {
+    if (cardMotions.get(project)?.animation === animation) cardMotions.delete(project);
+  };
+}
+
+// Next: the top card goes under the left of the pile and the right one comes up.
+// Previous: the reverse. A thrown card first flies off the screen on its side.
+function shiftStack(direction, throwFrom = null) {
+  const top = projectIn('center');
+  const incoming = projectIn(direction === 'next' ? 'right' : 'left');
+  const third = projectIn(direction === 'next' ? 'left' : 'right');
+  const from = new Map([top, incoming, third].map(project => {
+    const motion = cardMotions.get(project);
+    const drawn = getComputedStyle(project).transform;
+    motion?.animation.cancel();
+    cardMotions.delete(project);
+    return [project, drawn];
+  }));
+
+  [top, incoming, third].forEach(project => {
+    clearStackVars(project);
+    project.classList.remove('is-dragging');
+    project.style.removeProperty('transform');
+  });
+  top.dataset.slot = direction === 'next' ? 'left' : 'right';
+  incoming.dataset.slot = 'center';
+  third.dataset.slot = direction === 'next' ? 'right' : 'left';
+  hasReordered = true;
+  announceCenter();
+
+  glide(incoming, from.get(incoming));
+  glide(third, from.get(third));
+  if (!throwFrom) {
+    glide(top, from.get(top));
+    return;
   }
+  if (reducedMotion.matches) return;
+
+  // Fly off with the release speed, then slide back in under the pile.
+  const side = direction === 'next' ? -1 : 1;
+  const resting = getComputedStyle(top).transform;
+  const offscreen = `translate(${side * (innerWidth / 2 + top.offsetWidth)}px, 0px) ${throwFrom.transform} rotate(${side * 10}deg)`;
+  const flight = Math.min(280, Math.max(150, innerWidth / Math.max(0.8, Math.abs(throwFrom.speed))));
+  const animation = top.animate([
+    { transform: `translate(0px, 0px) ${throwFrom.transform} rotate(0deg)`, zIndex: 3, easing: 'cubic-bezier(0.3, 0.6, 0.6, 1)' },
+    { transform: offscreen, zIndex: 3, offset: 0.45 },
+    { transform: offscreen, zIndex: 0, offset: 0.4501, easing: 'cubic-bezier(0.22, 0.72, 0.28, 1)' },
+    { transform: `translate(0px, 0px) ${resting} rotate(0deg)`, zIndex: 0 }
+  ], { duration: flight / 0.45 });
+  cardMotions.set(top, { animation, restingTransform: resting });
+  animation.onfinish = () => {
+    if (cardMotions.get(top)?.animation === animation) cardMotions.delete(top);
+  };
 }
 
 deck.addEventListener('keydown', event => {
   if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
   event.preventDefault();
-  const project = projectIn(event.key === 'ArrowLeft' ? 'left' : 'right');
-  moveToSlot(project, 'center');
-  cardOf(project).focus({ preventScroll: true });
+  if (drag?.active) return;
+  if (compact.matches) {
+    shiftStack(event.key === 'ArrowLeft' ? 'previous' : 'next');
+  } else {
+    moveToSlot(projectIn(event.key === 'ArrowLeft' ? 'left' : 'right'), 'center');
+  }
+  cardOf(projectIn('center')).focus({ preventScroll: true });
 });
 
 /* Dragging */
@@ -115,6 +215,23 @@ deck.addEventListener('pointerdown', event => {
   const project = event.target.closest('.project');
   if (!project) return;
 
+  if (compact.matches) {
+    if (project.dataset.slot !== 'center') return;
+    const bounds = project.getBoundingClientRect();
+    drag = {
+      stack: true,
+      project,
+      id: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      // Held above its middle, the card swings the other way than when held below it.
+      grip: event.clientY < bounds.top + bounds.height / 2 ? 1 : -1,
+      samples: [],
+      active: false
+    };
+    return;
+  }
+
   const right = projectIn('right');
   const rightTransform = cardMotions.get(right)?.restingTransform ?? getComputedStyle(right).transform;
   drag = {
@@ -127,10 +244,76 @@ deck.addEventListener('pointerdown', event => {
   };
 });
 
+// The top card follows the finger; the card that would come up next grows into place.
+function dragStack(event, x, y) {
+  if (!drag.active) {
+    if (Math.hypot(x, y) < 8) return;
+    if (Math.abs(y) > Math.abs(x)) {
+      drag = null;
+      return;
+    }
+    const others = projects.filter(project => project !== drag.project);
+    [drag.project, ...others].forEach(project => {
+      cardMotions.get(project)?.animation.cancel();
+      cardMotions.delete(project);
+    });
+    Object.assign(drag, {
+      active: true,
+      from: getComputedStyle(drag.project).transform,
+      width: drag.project.offsetWidth
+    });
+    drag.project.classList.add('is-dragging');
+    deck.setPointerCapture(event.pointerId);
+  }
+
+  drag.samples.push({ x, time: event.timeStamp });
+  while (drag.samples.length > 2 && event.timeStamp - drag.samples[0].time > 100) drag.samples.shift();
+
+  const tilt = reducedMotion.matches ? 0 : Math.max(-20, Math.min(20, x / drag.width * 14 * drag.grip));
+  drag.project.style.transform = `translate(${x}px, ${y * 0.25}px) ${drag.from} rotate(${tilt}deg)`;
+
+  const incoming = projectIn(x < 0 ? 'right' : 'left');
+  clearStackVars(projectIn(x < 0 ? 'left' : 'right'));
+  const rest = 1 - Math.min(1, Math.abs(x) / (drag.width * 0.8));
+  const side = incoming.dataset.slot === 'right' ? 1 : -1;
+  incoming.style.setProperty('--slot-x', `calc(var(--spread) * ${side * rest})`);
+  incoming.style.setProperty('--slot-y', `${0.6 * rest}rem`);
+  incoming.style.setProperty('--slot-turn', `${side * 5 * rest}deg`);
+  incoming.style.setProperty('--slot-scale', `${1 - 0.1 * rest}`);
+}
+
+function releaseStack(event) {
+  const { project, samples, width, startX } = drag;
+  drag = null;
+  const x = (event.clientX ?? startX + (samples.at(-1)?.x ?? 0)) - startX;
+  const [first, last] = [samples[0], samples.at(-1)];
+  const speed = last && last.time > first.time ? (last.x - first.x) / (last.time - first.time) : 0;
+  const flicked = Math.abs(speed) > 0.4 && Math.sign(speed) === Math.sign(x) && Math.abs(x) > 16;
+  const thrown = event.type === 'pointerup' && (Math.abs(x) > width / 3 || flicked);
+
+  if (thrown) {
+    shiftStack(x < 0 ? 'next' : 'previous', { transform: getComputedStyle(project).transform, speed });
+    return;
+  }
+
+  // Not far or fast enough: everything springs back.
+  projects.forEach(card => {
+    const from = getComputedStyle(card).transform;
+    clearStackVars(card);
+    card.classList.remove('is-dragging');
+    card.style.removeProperty('transform');
+    glide(card, from, { duration: 420, easing: 'cubic-bezier(0.3, 1.3, 0.5, 1)' });
+  });
+}
+
 window.addEventListener('pointermove', event => {
   if (event.pointerId !== drag?.id) return;
   const x = event.clientX - drag.startX;
   const y = event.clientY - drag.startY;
+  if (drag.stack) {
+    dragStack(event, x, y);
+    return;
+  }
 
   if (!drag.active) {
     if (Math.max(Math.abs(x), Math.abs(y)) < 6) return;
@@ -165,11 +348,18 @@ window.addEventListener('pointermove', event => {
 
 function finishDrag(event) {
   if (event.pointerId !== drag?.id) return;
-  const { project, startX, spread, active } = drag;
-  drag = null;
-  if (!active) return;
-
+  if (!drag.active) {
+    drag = null;
+    return;
+  }
   swallowClick = true;
+  if (drag.stack) {
+    releaseStack(event);
+    return;
+  }
+
+  const { project, startX, spread } = drag;
+  drag = null;
   const distance = event.clientX - startX;
   let target = project.dataset.slot;
   if (event.type === 'pointerup' && Math.abs(distance) >= Math.max(24, spread * 0.3)) {

@@ -248,14 +248,15 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 
 /* Deck */
 .home {
+  --card-width: clamp(13.25rem, min(26vw, 40svh), 18rem);
+  --card-ratio: calc(88 / 107);
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .deck {
-  --card-width: clamp(13.25rem, min(26vw, 40svh), 18rem);
-  --card-ratio: calc(88 / 107);
   --spread: min(calc(var(--card-width) + 1.25rem), max(0px, calc(50vw - var(--card-width) / 2 - 1rem)));
   position: relative;
   width: 100%;
@@ -483,7 +484,7 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 @media (max-width: 38rem) {
   :root { --header-height: 4.25rem; }
 
-  .deck { --card-width: clamp(12rem, 69vw, 17rem); }
+  .home { --card-width: clamp(12rem, 69vw, 17rem); }
 
   /* Only the top card takes touches: the edges peeking out from under it would
      otherwise swap the hidden cards or open one the visitor can't see. */
@@ -495,6 +496,42 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 
   .project[data-slot="left"] { --slot-turn: -5deg; }
   .project[data-slot="right"] { --slot-turn: 5deg; }
+
+  .deck-dots { display: flex; }
+}
+
+/* Position dots under the phone stack; each one brings its card to the top. */
+.deck-dots {
+  position: absolute;
+  top: calc(50% - 1.25rem + var(--card-width) / var(--card-ratio) / 2 + 1.25rem);
+  left: 50%;
+  display: none;
+  translate: -50% 0;
+}
+
+.deck-dot {
+  display: grid;
+  width: 1.75rem;
+  height: 2.75rem;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.deck-dot::before {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--line);
+  content: "";
+  transition: background-color 200ms ease, scale 200ms ease;
+}
+
+.deck-dot[aria-current="true"]::before {
+  background: var(--text);
+  scale: 1.25;
 }
 
 /* Entrance: the cards are dealt one at a time. */
