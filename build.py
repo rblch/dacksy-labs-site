@@ -17,6 +17,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 LANGUAGES = ['en', 'es', 'de']  # The first one is the default, served from the root.
 PAGES = ['index.html', 'about.html', 'contact.html', 'impressum.html', 'datenschutz.html']
+# Pages with names, addresses or contact details. Search engines may read them
+# but are told not to list them (a robots.txt block would hide the noindex tag
+# from them); AI crawlers are kept out of them in robots.txt.
+PRIVATE_PAGES = ['contact.html', 'impressum.html', 'datenschutz.html']
+AI_CRAWLERS = [
+    'GPTBot', 'OAI-SearchBot', 'ChatGPT-User',
+    'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'anthropic-ai',
+    'Google-Extended', 'Applebot-Extended', 'CCBot',
+    'PerplexityBot', 'Perplexity-User', 'Meta-ExternalAgent', 'Meta-ExternalFetcher',
+    'Bytespider', 'Amazonbot', 'cohere-ai', 'Diffbot', 'DuckAssistBot',
+    'MistralAI-User', 'YouBot',
+]
 # Set to the live origin (e.g. "https://example.com") to emit hreflang alternates.
 SITE_URL = None
 
@@ -46,7 +58,7 @@ def fill(template, values):
     return template
 
 
-RAW = {'head', 'header', 'footer', 'language_links', 'alternates'} | {f'current_{p[:-5]}' for p in PAGES}
+RAW = {'head', 'header', 'footer', 'language_links', 'alternates', 'robots_meta'} | {f'current_{p[:-5]}' for p in PAGES}
 
 for lang in LANGUAGES:
     root = '../' if folder(lang) else ''
@@ -74,6 +86,7 @@ for lang in LANGUAGES:
             'root': root,
             'language_links': '\n'.join(links),
             'alternates': alternates,
+            'robots_meta': '  <meta name="robots" content="noindex, noarchive">\n' if page in PRIVATE_PAGES else '',
             **{f'current_{p[:-5]}': ' aria-current="page"' if p == page else '' for p in PAGES},
         }
         # A page can have its own template per language, e.g. src/impressum.en.html.
@@ -87,3 +100,13 @@ for lang in LANGUAGES:
         target.parent.mkdir(exist_ok=True)
         target.write_text(output)
         print(f'wrote {target.relative_to(ROOT)}')
+
+private_paths = [f'/{folder(lang)}{page}' for lang in LANGUAGES for page in PRIVATE_PAGES]
+robots = ['# Built by build.py. Edit PRIVATE_PAGES and AI_CRAWLERS there, not here.', '']
+robots += ['# Search engines may read every page; contact and legal pages carry a noindex tag.',
+           'User-agent: *', 'Allow: /', '']
+robots += ['# AI crawlers and agents: keep out of pages with names and contact details.']
+robots += [f'User-agent: {bot}' for bot in AI_CRAWLERS]
+robots += [f'Disallow: {path}' for path in private_paths]
+(ROOT / 'robots.txt').write_text('\n'.join(robots) + '\n')
+print('wrote robots.txt')
