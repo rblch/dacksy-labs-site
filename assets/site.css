@@ -237,6 +237,19 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 
 .prose-page ul { padding-left: 1.2rem; }
 
+/* A quiet sign-off under the about text, with the Cologne Cathedral glyph from the Dackel site. */
+.prose-page .origin {
+  margin-top: 2rem;
+  font-size: 0.8125rem;
+}
+
+.prose-page .origin svg {
+  width: 12px;
+  height: 16px;
+  margin-right: 6px;
+  vertical-align: baseline;
+}
+
 .prose-page .legal-note {
   margin-top: 2.25rem;
   padding-top: 1rem;

@@ -18,7 +18,7 @@
   "visit_dackel": "Dackel ansehen",
   "close_card": "Schließen",
   "about_title": "Über uns",
-  "about_html": "<p>Dacksy Labs ist ein unabhängiges App-Studio für kleine, verspielte Apps.</p>\n    <p>Wir entwickeln <a href=\"https://dackelapp.com/\">Dackel</a>, einen nativen Markdown-Editor für den Mac.</p>",
+  "about_html": "<p>Dacksy Labs ist ein unabhängiges App-Studio. Wir entwickeln nützliche Tools und achten auf jedes Detail.</p>\n    <p class=\"origin\"><svg viewBox=\"0 0 24 32\" fill=\"currentColor\" aria-hidden=\"true\" focusable=\"false\"><polygon points=\"1,32 1,24 2,24 2,17 3,17 3.5,12 4,13 6,1 8,13 8.5,12 9,17 10,17 10,22 12,18 14,22 14,17 15,17 15.5,12 16,13 18,1 20,13 20.5,12 21,17 22,17 22,24 23,24 23,32\"/></svg>Made in Köln</p>",
   "contact_title": "Kontakt",
   "contact_html": "<p>Bei Fragen, Feedback oder geschäftlichen Anfragen schreib uns an <a href=\"mailto:dacksylabs@gmail.com\">dacksylabs@gmail.com</a>.</p>"
 }
