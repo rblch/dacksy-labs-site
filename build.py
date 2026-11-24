@@ -5,7 +5,9 @@ after changing either; it writes English to the site root and the other
 languages to /<lang>/. Commit the output: hosting serves plain files.
 
 In the templates, {{key}} inserts a string from the language file (escaped),
-except keys ending in _html, which are inserted as written.
+except keys ending in _html, which are inserted as written. Long pages like the
+legal texts use one template per language instead: src/<page>.<lang>.html wins
+over src/<page>.html for that language.
 """
 import html
 import json
@@ -74,10 +76,13 @@ for lang in LANGUAGES:
             'alternates': alternates,
             **{f'current_{p[:-5]}': ' aria-current="page"' if p == page else '' for p in PAGES},
         }
-        output = fill((ROOT / 'src' / page).read_text(), values)
-        if lang == LANGUAGES[0] and '<mark>' in output:
-            print(f'warning: src/{page} still has placeholders marked with <mark>')
-        output = output.replace('<!doctype html>', f'<!doctype html>\n<!-- Built by build.py from src/{page}. Edit there, not here. -->', 1)
+        # A page can have its own template per language, e.g. src/impressum.en.html.
+        localized = ROOT / 'src' / page.replace('.html', f'.{lang}.html')
+        template = localized if localized.exists() else ROOT / 'src' / page
+        output = fill(template.read_text(), values)
+        if '<mark>' in output:
+            print(f'warning: src/{template.name} still has placeholders marked with <mark>')
+        output = output.replace('<!doctype html>', f'<!doctype html>\n<!-- Built by build.py from src/{template.name}. Edit there, not here. -->', 1)
         target = ROOT / folder(lang) / page
         target.parent.mkdir(exist_ok=True)
         target.write_text(output)
