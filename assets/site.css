@@ -496,8 +496,6 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 
   .project[data-slot="left"] { --slot-turn: -5deg; }
   .project[data-slot="right"] { --slot-turn: 5deg; }
-
-  .deck-dots { display: flex; }
 }
 
 /* Position dots under the phone stack; each one brings its card to the top. */
@@ -532,6 +530,10 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 .deck-dot[aria-current="true"]::before {
   background: var(--text);
   scale: 1.25;
+}
+
+@media (max-width: 38rem) {
+  .deck-dots { display: flex; }
 }
 
 /* Entrance: the cards are dealt one at a time. */
