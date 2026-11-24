@@ -484,9 +484,12 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
 
   .deck { --card-width: clamp(12rem, 69vw, 17rem); }
 
+  /* Only the top card takes touches: the edges peeking out from under it would
+     otherwise swap the hidden cards or open one the visitor can't see. */
   .project[data-slot="left"], .project[data-slot="right"] {
     --slot-y: 0.6rem;
     --slot-scale: 0.9;
+    pointer-events: none;
   }
 
   .project[data-slot="left"] { --slot-turn: -5deg; }
