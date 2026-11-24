@@ -14,11 +14,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 LANGUAGES = ['en', 'es', 'de']  # The first one is the default, served from the root.
-PAGES = ['index.html', 'about.html', 'contact.html', 'impressum.html']
+PAGES = ['index.html', 'about.html', 'contact.html', 'impressum.html', 'datenschutz.html']
 # Set to the live origin (e.g. "https://example.com") to emit hreflang alternates.
 SITE_URL = None
 
-partials = {name: (ROOT / 'src' / f'_{name}.html').read_text().rstrip('\n') for name in ['head', 'header']}
+partials = {name: (ROOT / 'src' / f'_{name}.html').read_text().rstrip('\n') for name in ['head', 'header', 'footer']}
 strings = {lang: json.loads((ROOT / 'i18n' / f'{lang}.json').read_text()) for lang in LANGUAGES}
 
 for lang in LANGUAGES[1:]:
@@ -44,7 +44,7 @@ def fill(template, values):
     return template
 
 
-RAW = {'head', 'header', 'language_links', 'alternates'} | {f'current_{p[:-5]}' for p in PAGES}
+RAW = {'head', 'header', 'footer', 'language_links', 'alternates'} | {f'current_{p[:-5]}' for p in PAGES}
 
 for lang in LANGUAGES:
     root = '../' if folder(lang) else ''
@@ -75,6 +75,8 @@ for lang in LANGUAGES:
             **{f'current_{p[:-5]}': ' aria-current="page"' if p == page else '' for p in PAGES},
         }
         output = fill((ROOT / 'src' / page).read_text(), values)
+        if lang == LANGUAGES[0] and '<mark>' in output:
+            print(f'warning: src/{page} still has placeholders marked with <mark>')
         output = output.replace('<!doctype html>', f'<!doctype html>\n<!-- Built by build.py from src/{page}. Edit there, not here. -->', 1)
         target = ROOT / folder(lang) / page
         target.parent.mkdir(exist_ok=True)

@@ -4,8 +4,9 @@
   "nav_label": "Navegación principal",
   "nav_about": "Acerca de",
   "nav_contact": "Contacto",
+  "nav_privacy": "Privacidad",
+  "legal_label": "Información legal",
   "language_label": "Idioma",
-
   "meta_description": "Descubre las apps de Dacksy Labs.",
   "projects": "Proyectos",
   "coming_soon": "Próximamente",
@@ -14,10 +15,8 @@
   "centered_status": "En el centro: {name}",
   "dackel_description": "Un editor de Markdown nativo para Mac e iOS, pensado para científicos, estudiantes, profesionales y escritores creativos.",
   "visit_dackel": "Visitar Dackel",
-
   "about_title": "Acerca de",
   "about_html": "<p>Dacksy Labs es un estudio independiente que crea apps pequeñas y divertidas.</p>\n    <p>Hacemos <a href=\"https://dackelapp.com/\">Dackel</a>, un editor de Markdown nativo para Mac.</p>",
-
   "contact_title": "Contacto",
   "contact_html": "<p>Para preguntas, comentarios o consultas comerciales, escríbenos a <a href=\"mailto:support@rblch.com\">support@rblch.com</a>.</p>"
 }
