@@ -135,7 +135,7 @@ function glide(project, from, { duration = 380, easing = 'cubic-bezier(0.22, 0.7
 }
 
 // Next: the top card goes under the left of the pile and the right one comes up.
-// Previous: the reverse. A thrown card first flies off the screen on its side.
+// Previous: the reverse. A thrown card first flies off the screen the way it was thrown.
 function shiftStack(direction, throwFrom = null) {
   const top = projectIn('center');
   const incoming = projectIn(direction === 'next' ? 'right' : 'left');
@@ -168,7 +168,7 @@ function shiftStack(direction, throwFrom = null) {
   if (reducedMotion.matches) return;
 
   // Fly off with the release speed, then slide back in under the pile.
-  const side = direction === 'next' ? -1 : 1;
+  const side = throwFrom.side;
   const resting = getComputedStyle(top).transform;
   const offscreen = `translate(${side * (innerWidth / 2 + top.offsetWidth)}px, 0px) ${throwFrom.transform} rotate(${side * 10}deg)`;
   const flight = Math.min(280, Math.max(150, innerWidth / Math.max(0.8, Math.abs(throwFrom.speed))));
@@ -244,7 +244,7 @@ deck.addEventListener('pointerdown', event => {
   };
 });
 
-// The top card follows the finger; the card that would come up next grows into place.
+// The top card follows the finger; the next card grows into place under it.
 function dragStack(event, x, y) {
   if (!drag.active) {
     if (Math.hypot(x, y) < 8) return;
@@ -272,10 +272,10 @@ function dragStack(event, x, y) {
   const tilt = reducedMotion.matches ? 0 : Math.max(-20, Math.min(20, x / drag.width * 14 * drag.grip));
   drag.project.style.transform = `translate(${x}px, ${y * 0.25}px) ${drag.from} rotate(${tilt}deg)`;
 
-  const incoming = projectIn(x < 0 ? 'right' : 'left');
-  clearStackVars(projectIn(x < 0 ? 'left' : 'right'));
+  // Swiping either way brings up the next card, which waits on the right.
+  const incoming = projectIn('right');
   const rest = 1 - Math.min(1, Math.abs(x) / (drag.width * 0.8));
-  const side = incoming.dataset.slot === 'right' ? 1 : -1;
+  const side = 1;
   incoming.style.setProperty('--slot-x', `calc(var(--spread) * ${side * rest})`);
   incoming.style.setProperty('--slot-y', `${0.6 * rest}rem`);
   incoming.style.setProperty('--slot-turn', `${side * 5 * rest}deg`);
@@ -292,7 +292,7 @@ function releaseStack(event) {
   const thrown = event.type === 'pointerup' && (Math.abs(x) > width / 3 || flicked);
 
   if (thrown) {
-    shiftStack(x < 0 ? 'next' : 'previous', { transform: getComputedStyle(project).transform, speed });
+    shiftStack('next', { transform: getComputedStyle(project).transform, speed, side: Math.sign(x) });
     return;
   }
 
