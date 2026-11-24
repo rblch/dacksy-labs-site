@@ -83,7 +83,8 @@ function moveToSlot(project, slot) {
   settleCard(project, from, swapLift(origin, slot));
   settleCard(occupant, occupantFrom, swapLift(slot, origin));
   if (origin === 'center' || slot === 'center') {
-    status.textContent = `${cardOf(projectIn('center')).getAttribute('aria-label')} is centered.`;
+    const name = cardOf(projectIn('center')).getAttribute('aria-label');
+    status.textContent = status.dataset.template.replace('{name}', name);
   }
 }
 

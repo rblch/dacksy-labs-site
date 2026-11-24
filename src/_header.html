@@ -1,0 +1,14 @@
+  <header class="header shell" lang="{{lang}}">
+    <a class="brand" href="index.html" aria-label="{{home_label}}">Dacksy Labs</a>
+    <nav class="site-nav" aria-label="{{nav_label}}">
+      <a href="about.html"{{current_about}}>{{nav_about}}</a>
+      <a href="contact.html"{{current_contact}}>{{nav_contact}}</a>
+      <a href="impressum.html"{{current_impressum}}>Impressum</a>
+      <details class="lang-picker">
+        <summary aria-label="{{language_label}}: {{lang_name}}">{{lang_code}}</summary>
+        <ul class="lang-menu">
+{{language_links}}
+        </ul>
+      </details>
+    </nav>
+  </header>

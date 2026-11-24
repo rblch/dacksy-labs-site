@@ -1,19 +1,29 @@
 <!doctype html>
+<!-- Built by build.py from src/contact.html. Edit there, not here. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#faf9f6">
-  <title>Contact · Dacksy Labs</title>
   <link rel="stylesheet" href="assets/site.css">
+  <script src="assets/nav.js" defer></script>
+  <title>Contact · Dacksy Labs</title>
 </head>
 <body>
-  <header class="header shell">
+  <header class="header shell" lang="en">
     <a class="brand" href="index.html" aria-label="Dacksy Labs home">Dacksy Labs</a>
     <nav class="site-nav" aria-label="Main navigation">
       <a href="about.html">About</a>
       <a href="contact.html" aria-current="page">Contact</a>
       <a href="impressum.html">Impressum</a>
+      <details class="lang-picker">
+        <summary aria-label="Language: English">EN</summary>
+        <ul class="lang-menu">
+          <li><a href="contact.html" hreflang="en" lang="en" aria-current="true">English</a></li>
+          <li><a href="es/contact.html" hreflang="es" lang="es">Español</a></li>
+          <li><a href="de/contact.html" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
     </nav>
   </header>
   <main class="prose-page">

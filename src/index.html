@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+{{head}}
+  <meta name="description" content="{{meta_description}}">
+  <title>Dacksy Labs</title>
+</head>
+<body>
+{{header}}
+
+  <main class="home">
+    <h1 class="sr-only">Dacksy Labs</h1>
+    <h2 class="sr-only" id="projects-title">{{projects}}</h2>
+    <ul class="deck" id="deck" tabindex="0" aria-labelledby="projects-title" aria-keyshortcuts="ArrowLeft ArrowRight">
+      <li class="project project--dackel" data-slot="left"
+          data-url="https://dackelapp.com/"
+          data-description="{{dackel_description}}">
+        <button class="project-card" type="button" aria-haspopup="dialog" aria-label="Dackel">
+          <img class="project-art" src="{{root}}assets/dackel-mascot.png" alt="" width="424" height="239" draggable="false">
+          <span class="project-caption"><span class="project-name">Dackel</span></span>
+        </button>
+      </li>
+      <li class="project project--coral" data-slot="center">
+        <button class="project-card" type="button" aria-haspopup="dialog" aria-label="{{coral_label}}">
+          <span class="project-caption"><span class="project-name">{{coming_soon}}</span></span>
+        </button>
+      </li>
+      <li class="project project--lilac" data-slot="right">
+        <button class="project-card" type="button" aria-haspopup="dialog" aria-label="{{lilac_label}}">
+          <span class="project-caption"><span class="project-name">{{coming_soon}}</span></span>
+        </button>
+      </li>
+    </ul>
+    <p class="sr-only" id="deck-status" aria-live="polite" data-template="{{centered_status}}"></p>
+  </main>
+
+  <dialog class="project-dialog" id="project-details" aria-labelledby="project-details-title" aria-describedby="project-details-copy">
+    <div class="project-flip">
+      <div class="project-flip-front" inert aria-hidden="true"></div>
+      <div class="project-flip-back">
+        <div class="project-back-art" hidden><img alt="" draggable="false"></div>
+        <div class="project-back-copy">
+          <h2 id="project-details-title" tabindex="-1" autofocus></h2>
+          <p id="project-details-copy" hidden></p>
+          <a class="button" id="project-visit" hidden>{{visit_dackel}}</a>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="{{root}}assets/site.js"></script>
+</body>
+</html>

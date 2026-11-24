@@ -1,0 +1,73 @@
+<!doctype html>
+<!-- Built by build.py from src/index.html. Edit there, not here. -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf9f6">
+  <link rel="stylesheet" href="../assets/site.css">
+  <script src="../assets/nav.js" defer></script>
+  <meta name="description" content="Descubre las apps de Dacksy Labs.">
+  <title>Dacksy Labs</title>
+</head>
+<body>
+  <header class="header shell" lang="es">
+    <a class="brand" href="index.html" aria-label="Inicio de Dacksy Labs">Dacksy Labs</a>
+    <nav class="site-nav" aria-label="Navegación principal">
+      <a href="about.html">Acerca de</a>
+      <a href="contact.html">Contacto</a>
+      <a href="impressum.html">Impressum</a>
+      <details class="lang-picker">
+        <summary aria-label="Idioma: Español">ES</summary>
+        <ul class="lang-menu">
+          <li><a href="../index.html" hreflang="en" lang="en">English</a></li>
+          <li><a href="../es/index.html" hreflang="es" lang="es" aria-current="true">Español</a></li>
+          <li><a href="../de/index.html" hreflang="de" lang="de">Deutsch</a></li>
+        </ul>
+      </details>
+    </nav>
+  </header>
+
+  <main class="home">
+    <h1 class="sr-only">Dacksy Labs</h1>
+    <h2 class="sr-only" id="projects-title">Proyectos</h2>
+    <ul class="deck" id="deck" tabindex="0" aria-labelledby="projects-title" aria-keyshortcuts="ArrowLeft ArrowRight">
+      <li class="project project--dackel" data-slot="left"
+          data-url="https://dackelapp.com/"
+          data-description="Un editor de Markdown nativo para Mac e iOS, pensado para científicos, estudiantes, profesionales y escritores creativos.">
+        <button class="project-card" type="button" aria-haspopup="dialog" aria-label="Dackel">
+          <img class="project-art" src="../assets/dackel-mascot.png" alt="" width="424" height="239" draggable="false">
+          <span class="project-caption"><span class="project-name">Dackel</span></span>
+        </button>
+      </li>
+      <li class="project project--coral" data-slot="center">
+        <button class="project-card" type="button" aria-haspopup="dialog" aria-label="Tarjeta coral: próximamente">
+          <span class="project-caption"><span class="project-name">Próximamente</span></span>
+        </button>
+      </li>
+      <li class="project project--lilac" data-slot="right">
+        <button class="project-card" type="button" aria-haspopup="dialog" aria-label="Tarjeta lila: próximamente">
+          <span class="project-caption"><span class="project-name">Próximamente</span></span>
+        </button>
+      </li>
+    </ul>
+    <p class="sr-only" id="deck-status" aria-live="polite" data-template="En el centro: {name}"></p>
+  </main>
+
+  <dialog class="project-dialog" id="project-details" aria-labelledby="project-details-title" aria-describedby="project-details-copy">
+    <div class="project-flip">
+      <div class="project-flip-front" inert aria-hidden="true"></div>
+      <div class="project-flip-back">
+        <div class="project-back-art" hidden><img alt="" draggable="false"></div>
+        <div class="project-back-copy">
+          <h2 id="project-details-title" tabindex="-1" autofocus></h2>
+          <p id="project-details-copy" hidden></p>
+          <a class="button" id="project-visit" hidden>Visitar Dackel</a>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="../assets/site.js"></script>
+</body>
+</html>
