@@ -9,6 +9,7 @@ except keys ending in _html, which are inserted as written. Long pages like the
 legal texts use one template per language instead: src/<page>.<lang>.html wins
 over src/<page>.html for that language.
 """
+import hashlib
 import html
 import json
 import re
@@ -31,6 +32,15 @@ AI_CRAWLERS = [
 ]
 # Set to the live origin (e.g. "https://example.com") to emit hreflang alternates.
 SITE_URL = "https://dacksylabs.com"
+
+# Stylesheet and scripts are linked with a fingerprint of their contents (?v=...), so a
+# browser fetches the new file after a deploy instead of pairing new pages with a cached
+# old one. Add a file here when a page starts linking it.
+VERSIONED_ASSETS = ['site.css', 'site.js', 'nav.js']
+versions = {
+    'version_' + name.replace('.', '_'): hashlib.sha256((ROOT / 'assets' / name).read_bytes()).hexdigest()[:10]
+    for name in VERSIONED_ASSETS
+}
 
 partials = {name: (ROOT / 'src' / f'_{name}.html').read_text().rstrip('\n') for name in ['head', 'header', 'footer']}
 strings = {lang: json.loads((ROOT / 'i18n' / f'{lang}.json').read_text()) for lang in LANGUAGES}
@@ -84,6 +94,7 @@ for lang in LANGUAGES:
             'lang': lang,
             'lang_code': lang.upper(),
             'root': root,
+            **versions,
             'language_links': '\n'.join(links),
             'alternates': alternates,
             'robots_meta': '  <meta name="robots" content="noindex, noarchive">\n' if page in PRIVATE_PAGES else '',
