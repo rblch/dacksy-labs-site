@@ -587,6 +587,15 @@ a:focus-visible, button:focus-visible, .deck:focus-visible {
   .deck-dots { display: flex; }
 }
 
+@media (max-width: 38rem) and (prefers-reduced-motion: no-preference) {
+  /* Fades the dots in when the window narrows into the stack layout. */
+  .deck-dots { animation: dots-in 400ms ease 150ms both; }
+
+  @keyframes dots-in {
+    from { opacity: 0; }
+  }
+}
+
 /* Entrance: the cards are dealt one at a time. */
 @media (prefers-reduced-motion: no-preference) {
   .deck.is-entering .project {

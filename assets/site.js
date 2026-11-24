@@ -55,9 +55,6 @@ function placeFeaturedCard() {
 }
 
 placeFeaturedCard();
-compact.addEventListener('change', () => {
-  if (!hasReordered && !drag?.active) placeFeaturedCard();
-});
 
 /* Moving cards between slots */
 
@@ -520,6 +517,114 @@ projects.forEach(project => {
     showProject(project, card);
   });
 });
+
+/* Switching between the row and the stack: each card glides from where it was drawn
+   to its place in the new layout, instead of jumping when the window crosses the breakpoint. */
+
+let wasCompact = compact.matches;
+let lastDrawn = null;
+
+// The deck's centre: card positions are kept relative to it, so a big jump in window size
+// (maximising, rotating a phone) still morphs around the middle of the page.
+function deckCentre() {
+  const bounds = deck.getBoundingClientRect();
+  return { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 };
+}
+
+// Where each card is drawn: its centre, turn, width and layer.
+function measureCards() {
+  const centre = deckCentre();
+  return projects.map(project => {
+    const bounds = project.getBoundingClientRect();
+    const style = getComputedStyle(project);
+    const matrix = new DOMMatrix(style.transform);
+    return {
+      x: bounds.left + bounds.width / 2 - centre.x,
+      y: bounds.top + bounds.height / 2 - centre.y,
+      turn: Math.atan2(matrix.b, matrix.a),
+      width: Math.hypot(matrix.a, matrix.b) * project.offsetWidth,
+      layer: Number(style.zIndex) || 0
+    };
+  });
+}
+
+function switchLayout() {
+  wasCompact = compact.matches;
+  const drawn = lastDrawn;
+  projects.forEach(project => {
+    cardMotions.get(project)?.animation.cancel();
+    cardMotions.delete(project);
+    clearStackVars(project);
+    project.classList.remove('is-dragging');
+    project.style.removeProperty('transform');
+  });
+  if (!hasReordered) placeFeaturedCard();
+  updateDots();
+  if (!drawn || reducedMotion.matches) {
+    rememberWhenSettled();
+    return;
+  }
+
+  const centre = deckCentre();
+  projects.forEach((project, index) => {
+    const from = drawn[index];
+    const style = getComputedStyle(project);
+    const to = style.transform;
+    const resting = new DOMMatrix(to);
+    const bounds = project.getBoundingClientRect();
+    // The transform is applied around the box centre, so this is where the box sits untransformed.
+    const boxX = bounds.left + bounds.width / 2 - resting.e;
+    const boxY = bounds.top + bounds.height / 2 - resting.f;
+    const scale = from.width / project.offsetWidth;
+    const [cos, sin] = [Math.cos(from.turn) * scale, Math.sin(from.turn) * scale];
+    const start = `matrix(${cos}, ${sin}, ${-sin}, ${cos}, ${centre.x + from.x - boxX}, ${centre.y + from.y - boxY})`;
+    // Cards keep their old layering at first and take the new one halfway through.
+    const layer = Number(style.zIndex) || 0;
+    const animation = project.animate([
+      { transform: start, zIndex: from.layer },
+      { zIndex: from.layer, offset: 0.5 },
+      { zIndex: layer, offset: 0.5001 },
+      { transform: to, zIndex: layer }
+    ], {
+      duration: 520,
+      easing: 'cubic-bezier(0.22, 0.72, 0.28, 1)'
+    });
+    cardMotions.set(project, { animation, restingTransform: to });
+    animation.onfinish = () => {
+      if (cardMotions.get(project)?.animation === animation) cardMotions.delete(project);
+    };
+  });
+  rememberWhenSettled();
+}
+
+// Resize events run before the page is laid out for the new size, but measuring here already
+// sees the new layout, so keep the last measurement from before the switch and use that.
+window.addEventListener('resize', () => {
+  if (compact.matches !== wasCompact) {
+    switchLayout();
+    return;
+  }
+  lastDrawn = measureCards();
+});
+compact.addEventListener('change', () => {
+  if (compact.matches !== wasCompact) switchLayout();
+});
+
+// Cards also move without a resize (swipes, the entrance, a previous switch). Once those
+// settle, note where the cards ended up, so a switch in a single step (rotating a phone,
+// maximising a window) still starts from the right place.
+let remembering = 0;
+function rememberWhenSettled() {
+  const ticket = ++remembering;
+  // Note where the cards start moving from now, in case the layout switches mid-move.
+  if (compact.matches === wasCompact) lastDrawn = measureCards();
+  Promise.all(deck.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {})))
+    .then(() => requestAnimationFrame(() => {
+      if (ticket === remembering && compact.matches === wasCompact) lastDrawn = measureCards();
+    }));
+}
+new MutationObserver(rememberWhenSettled).observe(deck, { subtree: true, attributeFilter: ['data-slot'] });
+requestAnimationFrame(rememberWhenSettled);
 
 /* Entrance */
 
