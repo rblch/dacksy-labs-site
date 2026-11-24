@@ -1,0 +1,62 @@
+/* Draft #2: unreleased projects stay half-developed, like instant film
+   that hasn't finished yet. Hover or focus coaxes a little more colour out. */
+
+@property --develop {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 26%;
+}
+
+.project-card.is-soon {
+  --film: #3b4050;
+  --develop: 26%;
+  transition: --develop 1.4s cubic-bezier(0.3, 0.6, 0.3, 1);
+}
+
+.is-soon::before {
+  background:
+    /* Chemistry spreads from the middle, so the centre develops first. */
+    radial-gradient(120% 110% at 50% 45%,
+      color-mix(in oklab, var(--card) calc(var(--develop) + 22%), var(--film)) 0%,
+      color-mix(in oklab, var(--card) var(--develop), var(--film)) 62%,
+      color-mix(in oklab, var(--card) calc(var(--develop) - 10%), var(--film)) 100%);
+}
+
+/* Film grain and the faint milky sheen of an emulsion still settling. */
+.is-soon::after {
+  position: absolute;
+  z-index: -1;
+  inset: var(--photo-border) var(--photo-border) auto;
+  aspect-ratio: 1;
+  border-radius: 0.15rem;
+  background:
+    radial-gradient(60% 45% at 30% 25%, rgb(255 255 255 / 14%), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.55;
+  content: "";
+  pointer-events: none;
+}
+
+.is-soon .project-name {
+  color: var(--muted);
+  font-weight: 540;
+}
+
+.is-soon:hover,
+.is-soon:focus-visible,
+.project-flip-front .is-soon { --develop: 58%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* A slow breath, as if it is still developing in your hand. */
+  .is-soon::before {
+    animation: still-developing 7s ease-in-out infinite alternate;
+  }
+
+  .project--lilac .is-soon::before { animation-delay: -3.5s; }
+
+  @keyframes still-developing {
+    from { filter: brightness(0.96) saturate(0.9); }
+    to { filter: brightness(1.06) saturate(1.1); }
+  }
+}
