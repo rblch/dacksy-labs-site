@@ -30,7 +30,7 @@ AI_CRAWLERS = [
     'MistralAI-User', 'YouBot',
 ]
 # Set to the live origin (e.g. "https://example.com") to emit hreflang alternates.
-SITE_URL = None
+SITE_URL = "https://dacksylabs.com"
 
 partials = {name: (ROOT / 'src' / f'_{name}.html').read_text().rstrip('\n') for name in ['head', 'header', 'footer']}
 strings = {lang: json.loads((ROOT / 'i18n' / f'{lang}.json').read_text()) for lang in LANGUAGES}
@@ -76,7 +76,7 @@ for lang in LANGUAGES:
             alternates = ''.join(
                 f'  <link rel="alternate" hreflang="{other}" href="{SITE_URL}/{folder(other)}{page}">\n'
                 for other in LANGUAGES
-            )
+            ) + f'  <link rel="alternate" hreflang="x-default" href="{SITE_URL}/{page}">\n'
 
         values = {
             **strings[lang],
